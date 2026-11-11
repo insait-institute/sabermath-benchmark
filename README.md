@@ -1,167 +1,151 @@
 <div align="center">
   <img src="images/sabermath_logo.png" alt="SABER-Math logo" width="320">
-</div>
 
 # SABER-Math
 
-`sabermath` evaluates retrieval and reranking models on SABER-Math, a benchmark for mathematical information retrieval. For each of 1,000 math problems, your model ranks 150 candidate solved problems, and the ranking is scored with nDCG@k against graded relevance labels.
+**An automated reranking benchmark for mathematical information retrieval**
 
-You use the package through two things:
+[📄 Paper](https://arxiv.org/abs/2606.29894) · [🌐 Website](https://sabermath.insait.ai) · [🤗 Data](https://huggingface.co/collections/INSAIT-Institute/saber-math) · [📚 Docs](docs/README.md)
 
-- **`sabermath.evaluate()`** runs the benchmark and returns a report.
-- **Processors** wrap a model so `evaluate` can score with it. Sentence Transformers, vLLM and OpenRouter are built in, and you can write your own by subclassing `EmbeddingProcessor` or `ModelProcessor`.
+</div>
 
-Full documentation: [`docs/`](docs/index.rst).
+Retrieval in math only helps if it returns problems that share a *method*, a *theorem* or a *key idea*
+with the problem at hand. Problems that merely look alike don't help.
+**SABER-Math** measures exactly that, and this package lets you score any retriever or reranker on it with one call.
+
+- **1,000 queries × 150 candidates.** Each query is a high-school or olympiad problem. Its candidates are solved
+  problems picked by topic similarity in a math ontology and by solution-method similarity.
+- **Fine-grained labels, no expert annotation.** Every candidate has a relevance rating in [0, 5] from a Swiss-style
+  tournament of pairwise LLM judgments, aggregated with Bradley–Terry and validated against human annotators.
+- **Three settings, five branches.** Problem→problem, problem→problem+solution (main), problem+solution→problem+solution.
+  Results are broken down into Algebra, Geometry, Number Theory, Combinatorics, and Calculus and Analysis.
+
+More in [The benchmark](docs/benchmark.md).
 
 ## Installation
-
-Python 3.10 or newer.
 
 ```bash
 git clone https://github.com/insait-institute/sabermath
 cd sabermath
 python -m pip install -e .            # Sentence Transformers + OpenRouter
-python -m pip install -e ".[vllm]"    # adds vLLM (needs a GPU)
+python -m pip install -e ".[vllm]"    # optional: adds vLLM (needs a CUDA GPU)
 ```
 
-## Evaluating a model
+Python 3.10+. Details and API keys: [Installation](docs/installation.md).
+
+## Quickstart
 
 ```python
 import sabermath
 
-report = sabermath.evaluate("BAAI/bge-m3")
+report = sabermath.evaluate("BAAI/bge-m3")      # downloads the data on first use
 
 for task in report.tasks:
     print(task.task, round(task.ndcg_at_k, 4))
 ```
 
-A model id is loaded with Sentence Transformers (or vLLM with `use_vllm=True`). The benchmark data is downloaded from Hugging Face on first use.
-
-The main options:
+A model id is loaded with Sentence Transformers, or with vLLM if you pass `use_vllm=True`.
+The most common options:
 
 ```python
 report = sabermath.evaluate(
     "Qwen/Qwen3-Embedding-0.6B",
-    tasks=["statement-full"],        # default: all three tasks
-    k=10,                            # nDCG cut-off
-    dcg_variant="exponent",          # or "linear"
-    init_kwargs={"device": "cuda"},  # how to build the model
-    scores_kwargs={                  # passed to every scoring call
+    tasks=["statement-full"],                          # the main setting; default: all three
+    init_kwargs={"device": "cuda"},                    # how to build the model
+    scores_kwargs={                                    # passed to every scoring call
         "batch_size": 32,
         "query_encode_kwargs": {"prompt_name": "query"},
     },
-    instruction="Given a math problem, retrieve mathematically relevant problems",
 )
+report.to_dict()                                       # JSON-ready
 ```
 
-| Task | Query | Documents |
-|---|---|---|
-| `statement-statement` | problem | problem |
-| `statement-full` (main) | problem | problem + solution |
-| `full-full` | problem + solution | problem + solution |
+Every argument, the report format, instructions, confidence intervals and the paper's exact protocol are covered in
+**[Running `evaluate()`](docs/evaluate.md)**.
 
-`report` holds the nDCG@k of each task, broken down by branch of mathematics (Algebra, Geometry, Number Theory, Combinatorics, Calculus and Analysis). `report.to_dict()` gives plain JSON-ready data, and `return_ndcgs=True` also returns the score of every query.
+## Evaluating your own model
 
-## Built-in processors
+`evaluate()` scores through a **processor**. Three are built in:
 
-| Processor | How to get it |
+| Processor | How to use it |
 |---|---|
 | `SentenceTransformersProcessor` | `evaluate("model/id")`, or pass a `SentenceTransformer` |
 | `VLLMProcessor` | `evaluate("model/id", use_vllm=True)`, or pass a `vllm.LLM` |
-| `OpenRouterEmbeddingProcessor` | `evaluate(OpenRouterEmbeddingProcessor("provider/model"))` |
+| `OpenRouterEmbeddingProcessor` | `evaluate(OpenRouterEmbeddingProcessor("openai/text-embedding-3-large"))` |
 
-```python
-from sabermath.processors import OpenRouterEmbeddingProcessor
-
-# API key from OPENROUTER_API_KEY or api_key=...
-report = sabermath.evaluate(OpenRouterEmbeddingProcessor("openai/text-embedding-3-large"))
-```
-
-All three are embedding processors: they embed the query and its candidates and score by cosine similarity. They accept `query_prompt`, `document_prompt`, `query_suffix`, `document_suffix`, `query_encode_kwargs` and `document_encode_kwargs` in `scores_kwargs`.
-
-## Writing your own processor
-
-Pass any processor instance to `evaluate`. Choose the base class by how your model scores.
-
-### An embedding model: subclass `EmbeddingProcessor`
-
-Implement `encode`, returning one vector per text. Cosine scoring and the prompt options above come with the base class.
+For anything else, subclass one of two base classes. An embedding model needs only `encode`:
 
 ```python
 import numpy as np
-import sabermath
 from sabermath.processors import EmbeddingProcessor
 
-class MyEmbeddingProcessor(EmbeddingProcessor):
-    processor = "my-backend"          # required; shown as report.processor
-
-    def __init__(self, client, model_name):
-        self._client = client
-        self._model_name = model_name
-
-    @property
-    def model(self):                  # shown as report.model
-        return self._model_name
-
-    def encode(self, texts, show_progress_bar=True, **kwargs) -> np.ndarray:
-        # must return shape (len(texts), dim), rows in input order
-        return np.asarray(self._client.embed(texts, **kwargs))
-
-report = sabermath.evaluate(MyEmbeddingProcessor(client, "my-model"))
-```
-
-### Anything else: subclass `ModelProcessor`
-
-Implement `get_scores`, returning one score per document (higher = more relevant). Use this for rerankers, lexical baselines, or custom similarity.
-
-```python
-from sentence_transformers import CrossEncoder
-from sabermath.processors import ModelProcessor
-
-class CrossEncoderProcessor(ModelProcessor):
-    processor = "cross-encoder"
+class MyEmbedder(EmbeddingProcessor):
+    processor = "my-backend"                          # required, shown in the report
 
     def __init__(self, model_name):
         self._model_name = model_name
-        self._model = CrossEncoder(model_name)
+        self._model = load_my_model(model_name)
 
     @property
     def model(self):
         return self._model_name
 
-    def get_scores(self, query, documents, *, show_progress_bar=True, **kwargs):
-        return self._model.predict([(query, d) for d in documents], **kwargs)
+    def encode(self, texts, show_progress_bar=True, **kwargs):
+        return np.asarray(self._model.embed(texts))   # (len(texts), dim); cosine scoring is built in
 
-report = sabermath.evaluate(
-    CrossEncoderProcessor("cross-encoder/ms-marco-MiniLM-L6-v2"),
-    scores_kwargs={"batch_size": 150},
-)
+report = sabermath.evaluate(MyEmbedder("my-model"))
 ```
 
-`evaluate` calls `get_scores(query, documents, show_progress_bar=False, **scores_kwargs)` once per query, where `documents` is the query's 150 candidate texts. Return `None` to skip a query; it is then left out of the averages.
+A reranker, BM25, or any other scorer subclasses `ModelProcessor` and implements
+`get_scores(query, documents)`, which returns one score per document (higher = more relevant).
 
-See [`docs/custom_processors.rst`](docs/custom_processors.rst) for the full contract and more examples (Hugging Face mean pooling, query/document-specific encoding, caching, BM25).
+See **[Writing a processor](docs/custom-processors.md)** for the full contract and worked examples:
+mean pooling, query/document-specific encoding, caching, cross-encoders, BM25, and how to test a processor.
 
-## Building the documentation
+## Results
 
-```bash
-python -m pip install -r docs/requirements.txt
-sphinx-build -b html docs docs/_build/html
-```
+Selected nDCG@10 scores from the paper, in the main `statement-full` setting (42 systems are evaluated there):
+
+| System | nDCG@10 |
+|---|---|
+| ReasonReranker-Qwen3-32B-Rewrite | **0.741** |
+| ReasonEmbed-Qwen3-8B | 0.710 |
+| Qwen3-Reranker-4B | 0.683 |
+| Qwen3-Embedding-4B | 0.615 |
+| Text-Embedding-3-Large | 0.557 |
+| BGE-m3 | 0.511 |
+| BM25 | 0.416 |
+| *random ranking* | *≈ 0.29* |
+
+Reasoning-trained retrievers lead, and every system struggles more on symbol-heavy branches (Algebra, Calculus).
+See [Reference results](docs/benchmark.md#reference-results) and the paper for the full table.
+
+## Documentation
+
+| | |
+|---|---|
+| [The benchmark](docs/benchmark.md) | what SABER-Math measures and how it was built |
+| [Installation](docs/installation.md) | install options, vLLM, API keys |
+| [Running `evaluate()`](docs/evaluate.md) | arguments, report, instructions, recipes, troubleshooting |
+| [Built-in processors](docs/processors.md) | Sentence Transformers, vLLM, OpenRouter options |
+| [Writing a processor](docs/custom-processors.md) | evaluate any model, reranker or baseline |
+| [API reference](docs/api.md) | all public signatures |
 
 ## License
 
-[CC BY-SA 4.0](LICENCE).
+The benchmark annotations and code are released under [CC BY-SA 4.0](LICENCE). The problem and solution texts keep the
+licenses of their original sources (see App. A.8 of the paper).
 
 ## Citation
 
 ```bibtex
-@inproceedings{
-  georgiev2026sabermath,
-  title={{SABER}-Math: An Automated Reranking Benchmark for Mathematical Information Retrieval},
-  author={Anonymous},
-  booktitle={The 2026 Conference on Empirical Methods in Natural Language Processing},
-  year={2026},
-  url={https://openreview.net/forum?id=Tb2EKLtAS0}
+@inproceedings{georgiev2026sabermath,
+  title     = {{SABER}-Math: An Automated Reranking Benchmark for Mathematical Information Retrieval},
+  author    = {Georgiev, Nikolay and Drencheva, Maria and Ibragimova, Kseniia and Petrov, Ivo and Dimitrov, Dimitar I. and Vechev, Martin},
+  booktitle = {The 2026 Conference on Empirical Methods in Natural Language Processing},
+  year      = {2026},
+  url       = {https://openreview.net/forum?id=Tb2EKLtAS0},
+  eprint    = {2606.29894},
+  archivePrefix = {arXiv}
 }
 ```
