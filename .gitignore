@@ -1,0 +1,14 @@
+__pycache__/
+*.egg-info
+
+logs/
+models/
+venv/
+.venv/
+.vector.cache/
+.cache/
+.hftok
+.openroutertok
+.geminitok
+
+docs/_build/

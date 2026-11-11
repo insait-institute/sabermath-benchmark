@@ -1,0 +1,6 @@
+from .base import ModelProcessor
+from .embedding_processor import EmbeddingProcessor
+from .st_processor import SentenceTransformersProcessor
+from .vllm_processor import VLLMProcessor
+from .openrouter_processor import OpenRouterEmbeddingProcessor
+from .unknown_processor import UnknownProcessor

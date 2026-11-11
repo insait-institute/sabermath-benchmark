@@ -1,0 +1,34 @@
+[build-system]
+requires = ["setuptools>=42"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sabermath"
+description = "SABER-Math: Benchmark for Information Retrieval Evaluation in Mathematics"
+requires-python = ">=3.10"
+dynamic = ["version"]
+license = "CC-BY-SA-4.0"
+
+dependencies = [
+    "sentence-transformers>=5.4.1",
+    "numpy>=2.2.6,<2.3; python_version < '3.11'",
+    "numpy>=2.4.4; python_version >= '3.11'",
+    "tqdm>=4.67.3",
+    "datasets>=4.8.5",
+    "pyyaml>=6.0",
+    "loguru>=0.7",
+    "requests>=2.31",
+    "openai>=2.33.0",
+]
+
+[project.optional-dependencies]
+vllm = [
+    "vllm==0.26.0",
+    "flashinfer-python==0.6.14"
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.dynamic]
+version = { attr = "sabermath.__version__.__version__" }
