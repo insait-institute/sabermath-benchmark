@@ -211,5 +211,5 @@ compute_ndcg_at_k(ranked, k=10, variant="exponent")
 
 <table width="100%"><tr>
 <td align="left">← <a href="custom-processors.md">Writing a processor</a></td>
-<td align="right"><a href="README.md">Docs home</a> ↩</td>
+<td align="right"><a href="cli.md">Command line</a> →</td>
 </tr></table>

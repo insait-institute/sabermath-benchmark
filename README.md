@@ -44,6 +44,8 @@ for task in report.tasks:
     print(task.task, round(task.ndcg_at_k, 4))
 ```
 
+Or from the shell: `sabermath evaluate BAAI/bge-m3 --task statement-full` (see [Command line](docs/cli.md)).
+
 A model id is loaded with Sentence Transformers, or with vLLM if you pass `use_vllm=True`.
 The most common options:
 
@@ -130,6 +132,7 @@ See [Reference results](docs/benchmark.md#reference-results) and the paper for t
 | [Built-in processors](docs/processors.md) | Sentence Transformers, vLLM, OpenRouter options |
 | [Writing a processor](docs/custom-processors.md) | evaluate any model, reranker or baseline |
 | [API reference](docs/api.md) | all public signatures |
+| [Command line](docs/cli.md) | `sabermath evaluate`, `download`, `help` |
 
 ## License
 

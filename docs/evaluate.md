@@ -2,7 +2,8 @@
 
 # Running `evaluate()`
 
-`sabermath.evaluate()` is the package's only entry point. You give it a model and it returns a report.
+`sabermath.evaluate()` is the package's main entry point. You give it a model and it returns a report.
+For quick runs from the shell, see [Command line](cli.md).
 
 **On this page:** [Quickstart](#quickstart) · [What happens during a run](#what-happens-during-a-run) ·
 [What `model` can be](#what-model-can-be) · [Arguments](#arguments) · [The report](#the-report) ·

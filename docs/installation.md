@@ -39,6 +39,8 @@ How to use it: [Built-in processors › vLLM](processors.md#vllm).
 export OPENROUTER_API_KEY=<your-key>
 ```
 
+Installing also adds the `sabermath` command, see [Command line](cli.md).
+
 ## Check the install
 
 Run the main task on 20 queries with a small model (works on CPU):

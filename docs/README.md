@@ -27,6 +27,7 @@ report = sabermath.evaluate("BAAI/bge-m3")
 | evaluate my own model, a reranker or a baseline | [Writing a processor](custom-processors.md) |
 | reproduce the paper's numbers | [Matching the paper's protocol](evaluate.md#matching-the-papers-protocol) |
 | look up a signature | [API reference](api.md) |
+| run the benchmark from the shell | [Command line](cli.md) |
 
 ## All pages
 
@@ -36,6 +37,7 @@ report = sabermath.evaluate("BAAI/bge-m3")
 4. **[Built-in processors](processors.md)**: Sentence Transformers, vLLM, OpenRouter, and the shared embedding options
 5. **[Writing a processor](custom-processors.md)**: the processor contract, `EmbeddingProcessor` and `ModelProcessor` with worked examples, testing
 6. **[API reference](api.md)**: signatures of everything public
+7. **[Command line](cli.md)**: `sabermath evaluate`, `download` and `help`
 
 ## The two concepts
 
