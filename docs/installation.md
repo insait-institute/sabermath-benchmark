@@ -5,6 +5,12 @@
 You need Python 3.10 or newer.
 
 ```bash
+pip install sabermath
+```
+
+Or install from source, for example to work on the code:
+
+```bash
 git clone https://github.com/insait-institute/sabermath
 cd sabermath
 python -m pip install -e .
@@ -21,7 +27,7 @@ The base install includes Sentence Transformers and the OpenRouter client, so it
 [vLLM](https://github.com/vllm-project/vllm) runs large embedding models much faster. It needs a CUDA GPU.
 
 ```bash
-python -m pip install -e ".[vllm]"
+pip install "sabermath[vllm]"         # from source: python -m pip install -e ".[vllm]"
 ```
 
 The extra pins `vllm==0.26.0`. Other vLLM versions may name some options differently.
@@ -39,7 +45,16 @@ How to use it: [Built-in processors › vLLM](processors.md#vllm).
 export OPENROUTER_API_KEY=<your-key>
 ```
 
-Installing also adds the `sabermath` command, see [Command line](cli.md).
+## The `sabermath` command
+
+Both install methods add a `sabermath` command (`python -m sabermath` works too):
+
+```bash
+sabermath help              # list the commands
+sabermath download          # optional: fetch the benchmark data now
+```
+
+See [Command line](cli.md) for `sabermath evaluate`.
 
 ## Check the install
 
@@ -57,6 +72,12 @@ report = sabermath.evaluate(
     documents=documents,
 )
 print(report.tasks[0].ndcg_at_k)           # a random ranking scores about 0.29
+```
+
+Or run the main task in full from the shell (all 1,000 queries, so it takes longer):
+
+```bash
+sabermath evaluate sentence-transformers/all-MiniLM-L6-v2 --task statement-full
 ```
 
 ---

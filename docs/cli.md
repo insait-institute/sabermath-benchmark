@@ -2,8 +2,13 @@
 
 # Command line
 
-Installing the package adds a `sabermath` command. It runs the benchmark without writing any Python.
-`python -m sabermath` does the same.
+The `sabermath` command runs the benchmark without writing any Python. It comes with the package:
+
+```bash
+pip install sabermath                 # or "sabermath[vllm]" for --vllm, see Installation
+```
+
+`python -m sabermath` does the same as `sabermath`.
 
 ```bash
 sabermath evaluate BAAI/bge-m3

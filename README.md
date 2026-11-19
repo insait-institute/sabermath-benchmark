@@ -25,13 +25,19 @@ More in [The benchmark](docs/benchmark.md).
 ## Installation
 
 ```bash
-git clone https://github.com/insait-institute/sabermath
-cd sabermath
-python -m pip install -e .            # Sentence Transformers + OpenRouter
-python -m pip install -e ".[vllm]"    # optional: adds vLLM (needs a CUDA GPU)
+pip install sabermath                 # Sentence Transformers + OpenRouter
+pip install "sabermath[vllm]"         # optional: adds vLLM (needs a CUDA GPU)
 ```
 
-Python 3.10+. Details and API keys: [Installation](docs/installation.md).
+Or from source:
+
+```bash
+git clone https://github.com/insait-institute/sabermath
+cd sabermath
+python -m pip install -e .            # add ".[vllm]" for vLLM
+```
+
+Python 3.10+. Both install the `sabermath` command. Details and API keys: [Installation](docs/installation.md).
 
 ## Quickstart
 
@@ -43,8 +49,6 @@ report = sabermath.evaluate("BAAI/bge-m3")      # downloads the data on first us
 for task in report.tasks:
     print(task.task, round(task.ndcg_at_k, 4))
 ```
-
-Or from the shell: `sabermath evaluate BAAI/bge-m3 --task statement-full` (see [Command line](docs/cli.md)).
 
 A model id is loaded with Sentence Transformers, or with vLLM if you pass `use_vllm=True`.
 The most common options:
@@ -64,6 +68,20 @@ report.to_dict()                                       # JSON-ready
 
 Every argument, the report format, instructions, confidence intervals and the paper's exact protocol are covered in
 **[Running `evaluate()`](docs/evaluate.md)**.
+
+## Command line
+
+The same run without writing Python:
+
+```bash
+sabermath evaluate BAAI/bge-m3                                    # all three tasks
+sabermath evaluate Qwen/Qwen3-Embedding-0.6B --task statement-full --device cuda
+sabermath evaluate Qwen/Qwen3-Embedding-0.6B --vllm               # load with vLLM
+sabermath download                                                # fetch the data ahead of time
+sabermath help evaluate                                           # all options
+```
+
+`--task` can be repeated. It prints nDCG@10 for each task and branch. See **[Command line](docs/cli.md)**.
 
 ## Evaluating your own model
 

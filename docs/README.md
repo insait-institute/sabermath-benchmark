@@ -11,11 +11,17 @@
 For each of 1,000 math problems, your model ranks 150 candidate solved problems, and the ranking is scored with nDCG@10
 against graded relevance ratings.
 
+```bash
+pip install sabermath
+```
+
 ```python
 import sabermath
 
 report = sabermath.evaluate("BAAI/bge-m3")
 ```
+
+or from the shell: `sabermath evaluate BAAI/bge-m3` ([Command line](cli.md)).
 
 ## Where to start
 
