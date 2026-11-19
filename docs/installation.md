@@ -11,8 +11,8 @@ pip install sabermath
 Or install from source, for example to work on the code:
 
 ```bash
-git clone https://github.com/insait-institute/sabermath
-cd sabermath
+git clone https://github.com/insait-institute/sabermath-benchmark
+cd sabermath-benchmark
 python -m pip install -e .
 ```
 

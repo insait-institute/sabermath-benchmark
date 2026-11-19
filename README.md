@@ -1,11 +1,11 @@
 <div align="center">
-  <img src="images/sabermath_logo.png" alt="SABER-Math logo" width="320">
+  <img src="https://raw.githubusercontent.com/insait-institute/sabermath-benchmark/master/images/sabermath_logo.png" alt="SABER-Math logo" width="320">
 
 # SABER-Math
 
 **An automated reranking benchmark for mathematical information retrieval**
 
-[📄 Paper](https://arxiv.org/abs/2606.29894) · [🌐 Website](https://sabermath.insait.ai) · [🤗 Data](https://huggingface.co/collections/INSAIT-Institute/saber-math) · [📚 Docs](docs/README.md)
+[📄 Paper](https://arxiv.org/abs/2606.29894) · [🌐 Website](https://sabermath.insait.ai) · [🤗 Data](https://huggingface.co/collections/INSAIT-Institute/saber-math) · [📚 Docs](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/README.md)
 
 </div>
 
@@ -20,7 +20,7 @@ with the problem at hand. Problems that merely look alike don't help.
 - **Three settings, five branches.** Problem→problem, problem→problem+solution (main), problem+solution→problem+solution.
   Results are broken down into Algebra, Geometry, Number Theory, Combinatorics, and Calculus and Analysis.
 
-More in [The benchmark](docs/benchmark.md).
+More in [The benchmark](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/benchmark.md).
 
 ## Installation
 
@@ -32,12 +32,12 @@ pip install "sabermath[vllm]"         # optional: adds vLLM (needs a CUDA GPU)
 Or from source:
 
 ```bash
-git clone https://github.com/insait-institute/sabermath
-cd sabermath
+git clone https://github.com/insait-institute/sabermath-benchmark
+cd sabermath-benchmark
 python -m pip install -e .            # add ".[vllm]" for vLLM
 ```
 
-Python 3.10+. Both install the `sabermath` command. Details and API keys: [Installation](docs/installation.md).
+Python 3.10+. Both install the `sabermath` command. Details and API keys: [Installation](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/installation.md).
 
 ## Quickstart
 
@@ -67,7 +67,7 @@ report.to_dict()                                       # JSON-ready
 ```
 
 Every argument, the report format, instructions, confidence intervals and the paper's exact protocol are covered in
-**[Running `evaluate()`](docs/evaluate.md)**.
+**[Running `evaluate()`](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/evaluate.md)**.
 
 ## Command line
 
@@ -81,7 +81,7 @@ sabermath download                                                # fetch the da
 sabermath help evaluate                                           # all options
 ```
 
-`--task` can be repeated. It prints nDCG@10 for each task and branch. See **[Command line](docs/cli.md)**.
+`--task` can be repeated. It prints nDCG@10 for each task and branch. See **[Command line](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/cli.md)**.
 
 ## Evaluating your own model
 
@@ -119,7 +119,7 @@ report = sabermath.evaluate(MyEmbedder("my-model"))
 A reranker, BM25, or any other scorer subclasses `ModelProcessor` and implements
 `get_scores(query, documents)`, which returns one score per document (higher = more relevant).
 
-See **[Writing a processor](docs/custom-processors.md)** for the full contract and worked examples:
+See **[Writing a processor](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/custom-processors.md)** for the full contract and worked examples:
 mean pooling, query/document-specific encoding, caching, cross-encoders, BM25, and how to test a processor.
 
 ## Results
@@ -138,23 +138,23 @@ Selected nDCG@10 scores from the paper, in the main `statement-full` setting (42
 | *random ranking* | *≈ 0.29* |
 
 Reasoning-trained retrievers lead, and every system struggles more on symbol-heavy branches (Algebra, Calculus).
-See [Reference results](docs/benchmark.md#reference-results) and the paper for the full table.
+See [Reference results](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/benchmark.md#reference-results) and the paper for the full table.
 
 ## Documentation
 
 | | |
 |---|---|
-| [The benchmark](docs/benchmark.md) | what SABER-Math measures and how it was built |
-| [Installation](docs/installation.md) | install options, vLLM, API keys |
-| [Running `evaluate()`](docs/evaluate.md) | arguments, report, instructions, recipes, troubleshooting |
-| [Built-in processors](docs/processors.md) | Sentence Transformers, vLLM, OpenRouter options |
-| [Writing a processor](docs/custom-processors.md) | evaluate any model, reranker or baseline |
-| [API reference](docs/api.md) | all public signatures |
-| [Command line](docs/cli.md) | `sabermath evaluate`, `download`, `help` |
+| [The benchmark](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/benchmark.md) | what SABER-Math measures and how it was built |
+| [Installation](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/installation.md) | install options, vLLM, API keys |
+| [Running `evaluate()`](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/evaluate.md) | arguments, report, instructions, recipes, troubleshooting |
+| [Built-in processors](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/processors.md) | Sentence Transformers, vLLM, OpenRouter options |
+| [Writing a processor](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/custom-processors.md) | evaluate any model, reranker or baseline |
+| [API reference](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/api.md) | all public signatures |
+| [Command line](https://github.com/insait-institute/sabermath-benchmark/blob/master/docs/cli.md) | `sabermath evaluate`, `download`, `help` |
 
 ## License
 
-The benchmark annotations and code are released under [CC BY-SA 4.0](LICENCE). The problem and solution texts keep the
+The benchmark annotations and code are released under [CC BY-SA 4.0](https://github.com/insait-institute/sabermath-benchmark/blob/master/LICENCE). The problem and solution texts keep the
 licenses of their original sources (see App. A.8 of the paper).
 
 ## Citation
